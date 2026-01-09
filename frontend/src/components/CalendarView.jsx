@@ -46,19 +46,19 @@ export default function CalendarView({ tasks, onUpdateTask, onDeleteTask, onTogg
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={goToPreviousWeek}>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="flex-shrink-0">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground">
             {weekDays[0].toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </h2>
-          <Button variant="outline" size="icon" onClick={goToNextWeek}>
+          <Button variant="outline" size="icon" onClick={goToNextWeek} className="flex-shrink-0">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <Button variant="outline" onClick={goToToday}>
+        <Button variant="outline" onClick={goToToday} className="flex-shrink-0">
           Today
         </Button>
       </div>

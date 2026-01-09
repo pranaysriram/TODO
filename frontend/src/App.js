@@ -15,12 +15,21 @@ export default function App() {
   useEffect(() => {
     const savedTasks = localStorage.getItem('todoTasks');
     if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
+      try {
+        const parsed = JSON.parse(savedTasks);
+        setTasks(parsed);
+        console.log('Loaded tasks from localStorage:', parsed);
+      } catch (error) {
+        console.error('Error loading tasks from localStorage:', error);
+      }
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('todoTasks', JSON.stringify(tasks));
+    if (tasks.length > 0 || localStorage.getItem('todoTasks')) {
+      localStorage.setItem('todoTasks', JSON.stringify(tasks));
+      console.log('Saved tasks to localStorage:', tasks);
+    }
   }, [tasks]);
 
   const addTask = (taskText) => {

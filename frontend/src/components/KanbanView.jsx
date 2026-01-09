@@ -21,7 +21,7 @@ export default function KanbanView({ tasks, onUpdateTask, onDeleteTask, onToggle
             <Icon className={`h-5 w-5 ${color}`} />
             <span className="text-base font-semibold">{title}</span>
           </div>
-          <Badge variant="secondary">{tasks.length}</Badge>
+          <Badge variant="secondary" className="ml-2">{tasks.length}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 pt-0">

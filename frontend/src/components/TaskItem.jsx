@@ -83,11 +83,11 @@ export default function TaskItem({
       <Checkbox
         checked={task.completed}
         onCheckedChange={() => onToggleComplete(task.id)}
-        className="mt-0.5"
+        className="mt-0.5 flex-shrink-0"
       />
       
       <div className="flex-1 min-w-0">
-        <p className={`${compact ? 'text-sm' : 'text-base'} ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+        <p className={`${compact ? 'text-sm' : 'text-base'} ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'} break-words`}>
           {task.text}
         </p>
         {!compact && showStatusDropdown && (
@@ -97,7 +97,7 @@ export default function TaskItem({
         )}
       </div>
 
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
         {showStatusDropdown && !task.completed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
