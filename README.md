@@ -27,6 +27,7 @@ A simple and user-friendly **To-Do List application** designed to help users org
 
 ## ⚙️ How to Run the Project Locally
 
-### 1️⃣ Clone the repository
+### 1️⃣ Install dependencies
 ```bash
-git clone https://github.com/pranaysriram/TODO.git
+npm install --legacy-peer-deps
+
