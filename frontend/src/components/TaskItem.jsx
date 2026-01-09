@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Checkbox } from './ui/checkbox';
-import { Pencil, Trash2, Check, X } from 'lucide-react';
+import { Pencil, Trash2, Check, X, Clock } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,40 @@ import {
 } from './ui/dropdown-menu';
 import { Badge } from './ui/badge';
 import { toast } from 'sonner';
+
+const priorityConfig = {
+  high: { icon: '🔴', label: 'High', color: 'bg-red-100 text-red-800 border-red-300' },
+  medium: { icon: '🟡', label: 'Medium', color: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+  low: { icon: '🟢', label: 'Low', color: 'bg-green-100 text-green-800 border-green-300' }
+};
+
+const labelConfig = {
+  study: { label: 'Study', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+  work: { label: 'Workout', color: 'bg-purple-100 text-purple-800 border-purple-300' },
+  health: { label: 'Health', color: 'bg-pink-100 text-pink-800 border-pink-300' }
+};
+
+const formatDueDate = (dueDatetime) => {
+  if (!dueDatetime) return null;
+  try {
+    const date = new Date(dueDatetime);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
+    if (date.toDateString() === today.toDateString()) {
+      return `Today at ${timeStr}`;
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return `Tomorrow at ${timeStr}`;
+    }
+    return `${dateStr} at ${timeStr}`;
+  } catch {
+    return dueDatetime;
+  }
+};
 
 export default function TaskItem({
   task,
@@ -79,29 +113,71 @@ export default function TaskItem({
   }
 
   return (
-    <div className={`group flex items-center gap-3 ${compact ? 'p-2' : 'p-4'} bg-card hover:bg-muted/30 rounded-lg border border-border transition-colors`}>
+    <div className={`group flex items-start gap-3 ${compact ? 'p-2' : 'p-4'} bg-card hover:bg-muted/30 rounded-lg border border-border transition-colors`}>
       <Checkbox
         checked={task.completed}
         onCheckedChange={() => onToggleComplete(task.id)}
-        className="mt-0.5 flex-shrink-0"
+        className="mt-1 flex-shrink-0"
       />
       
       <div className="flex-1 min-w-0">
-        <p className={`${compact ? 'text-sm' : 'text-base'} ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'} break-words`}>
-          {task.text}
-        </p>
-        {!compact && showStatusDropdown && (
-          <div className="mt-1">
-            {getStatusBadge()}
-          </div>
-        )}
+        {/** Force horizontal layout to avoid vertical letter stacking. Use single-line truncation for compact or completed tasks. */}
+        {(() => {
+          const horizontal = compact || task.completed;
+          const sizeClass = compact ? 'text-sm' : 'text-base';
+          const textClasses = `${sizeClass} ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`;
+          const style = {
+            writingMode: 'horizontal-tb',
+            whiteSpace: horizontal ? 'nowrap' : 'normal',
+            overflow: horizontal ? 'hidden' : 'visible',
+            textOverflow: horizontal ? 'ellipsis' : 'clip'
+          };
+          return (
+            <p className={`${horizontal ? 'truncate' : ''} ${textClasses}`} style={style}>
+              {task.text}
+            </p>
+          );
+        })()}
+        
+          <div className="flex flex-wrap gap-2 mt-2 items-center">
+            {!compact && (
+              <>
+                {task.priority && (
+                  <Badge variant="outline" className={`${priorityConfig[task.priority]?.color} border`}>
+                    {priorityConfig[task.priority]?.icon} {priorityConfig[task.priority]?.label}
+                  </Badge>
+                )}
+
+                {task.dueDate && (
+                  <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300 flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {formatDueDate(task.dueDate)}
+                  </Badge>
+                )}
+
+                {task.reminder && task.reminder !== 'none' && (
+                  <Badge variant="outline" className="bg-indigo-100 text-indigo-800 border-indigo-300">
+                    {task.reminder === '15min' && '⏰ 15m'}
+                    {task.reminder === '1hr' && '⏰ 1hr'}
+                    {task.reminder === '1day' && '⏰ 1d'}
+                  </Badge>
+                )}
+              </>
+            )}
+          
+          {!compact && showStatusDropdown && (
+            <div>
+              {getStatusBadge()}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
         {showStatusDropdown && !task.completed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-8 w-8">
+              <Button size="icon" variant="ghost" className="h-10 w-10 md:h-8 md:w-8">
                 <span className="text-xs">⋯</span>
               </Button>
             </DropdownMenuTrigger>
@@ -120,16 +196,16 @@ export default function TaskItem({
           size="icon"
           variant="ghost"
           onClick={() => setIsEditing(true)}
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          className="h-10 w-10 md:h-8 md:w-8 text-muted-foreground hover:text-foreground"
         >
           <Pencil className="h-4 w-4" />
         </Button>
-        
+
         <Button
           size="icon"
           variant="ghost"
           onClick={handleDelete}
-          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+          className="h-10 w-10 md:h-8 md:w-8 text-muted-foreground hover:text-destructive"
         >
           <Trash2 className="h-4 w-4" />
         </Button>

@@ -1,5 +1,6 @@
 import React from 'react';
 import TaskItem from './TaskItem';
+import ProgressTracker from './ProgressTracker';
 import { Separator } from './ui/separator';
 
 export default function ListView({ tasks, onUpdateTask, onDeleteTask, onToggleComplete }) {
@@ -8,6 +9,8 @@ export default function ListView({ tasks, onUpdateTask, onDeleteTask, onToggleCo
 
   return (
     <div className="max-w-3xl mx-auto">
+      {tasks.length > 0 && <ProgressTracker tasks={tasks} />}
+      
       <div className="bg-card rounded-xl border border-border shadow-sm p-6">
         {tasks.length === 0 ? (
           <div className="text-center py-12">

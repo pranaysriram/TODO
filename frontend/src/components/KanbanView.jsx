@@ -13,7 +13,7 @@ export default function KanbanView({ tasks, onUpdateTask, onDeleteTask, onToggle
     onUpdateTask(taskId, { status: newStatus });
   };
 
-  const KanbanColumn = ({ title, tasks, status, icon: Icon, color }) => (
+  const KanbanColumn = ({ title, tasks, status, icon: Icon, color, compactItems = false }) => (
     <Card className="flex flex-col h-full">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between">
@@ -39,7 +39,8 @@ export default function KanbanView({ tasks, onUpdateTask, onDeleteTask, onToggle
                 onDelete={onDeleteTask}
                 onToggleComplete={onToggleComplete}
                 onStatusChange={handleStatusChange}
-                showStatusDropdown
+                showStatusDropdown={!compactItems}
+                compact={compactItems}
               />
             ))}
           </div>
@@ -70,6 +71,7 @@ export default function KanbanView({ tasks, onUpdateTask, onDeleteTask, onToggle
         status="done"
         icon={CheckCircle2}
         color="text-success"
+        compactItems={true}
       />
     </div>
   );
