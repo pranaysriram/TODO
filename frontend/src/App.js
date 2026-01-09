@@ -1,54 +1,107 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
+import { LayoutList, Calendar, LayoutGrid } from 'lucide-react';
+import ListView from './components/ListView';
+import CalendarView from './components/CalendarView';
+import KanbanView from './components/KanbanView';
+import Header from './components/Header';
+import { Toaster } from './components/ui/sonner';
+import './App.css';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+export default function App() {
+  const [tasks, setTasks] = useState([]);
+  const [activeView, setActiveView] = useState('list');
 
   useEffect(() => {
-    helloWorldApi();
+    const savedTasks = localStorage.getItem('todoTasks');
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks));
+    }
   }, []);
 
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+  useEffect(() => {
+    localStorage.setItem('todoTasks', JSON.stringify(tasks));
+  }, [tasks]);
 
-function App() {
+  const addTask = (taskText) => {
+    const newTask = {
+      id: Date.now(),
+      text: taskText,
+      completed: false,
+      createdAt: new Date().toISOString(),
+      status: 'todo'
+    };
+    setTasks([newTask, ...tasks]);
+  };
+
+  const updateTask = (id, updates) => {
+    setTasks(tasks.map(task => 
+      task.id === id ? { ...task, ...updates } : task
+    ));
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const toggleComplete = (id) => {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+    <div className="min-h-screen bg-background">
+      <Header onAddTask={addTask} />
+      
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8 h-12 bg-muted/50">
+            <TabsTrigger value="list" className="flex items-center gap-2">
+              <LayoutList className="h-4 w-4" />
+              <span className="hidden sm:inline">List</span>
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Calendar</span>
+            </TabsTrigger>
+            <TabsTrigger value="kanban" className="flex items-center gap-2">
+              <LayoutGrid className="h-4 w-4" />
+              <span className="hidden sm:inline">Kanban</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="list" className="mt-0">
+            <ListView
+              tasks={tasks}
+              onUpdateTask={updateTask}
+              onDeleteTask={deleteTask}
+              onToggleComplete={toggleComplete}
+            />
+          </TabsContent>
+
+          <TabsContent value="calendar" className="mt-0">
+            <CalendarView
+              tasks={tasks}
+              onUpdateTask={updateTask}
+              onDeleteTask={deleteTask}
+              onToggleComplete={toggleComplete}
+            />
+          </TabsContent>
+
+          <TabsContent value="kanban" className="mt-0">
+            <KanbanView
+              tasks={tasks}
+              onUpdateTask={updateTask}
+              onDeleteTask={deleteTask}
+              onToggleComplete={toggleComplete}
+            />
+          </TabsContent>
+        </Tabs>
+      </main>
+      
+      <Toaster />
     </div>
   );
 }
 
-export default App;
